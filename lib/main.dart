@@ -1,24 +1,38 @@
+import 'package:day_night_switcher/day_night_switcher.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
+import 'package:to_do_provider/ctrl/home_ctrl.dart';
 import 'package:to_do_provider/pages/todo_page.dart';
 import 'package:to_do_provider/providers/active_todo_count.dart';
 import 'package:to_do_provider/providers/filtered_todos.dart';
+import 'package:to_do_provider/providers/theme_ctrl.dart';
+import 'package:to_do_provider/providers/theme_setting.dart';
 import 'package:to_do_provider/providers/todo_filter.dart';
 import 'package:to_do_provider/providers/todo_list.dart';
 import 'package:to_do_provider/providers/todo_search.dart';
 
 void main() {
-  runApp(const MyApp());
+  Get.put(ThemeSettingCtrl());
+  Get.put(HomeCtrl());
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  MyApp({Key? key}) : super(key: key);
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    bool isMaterialChanged = false;
+    if (isMaterialChanged != Get.find<ThemeSettingCtrl>().isChanged.value) {
+      isMaterialChanged = Get.find<ThemeSettingCtrl>().isChanged.value;
+    }
+
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider<ThemeSettingProvider>(
+          create: (context) => ThemeSettingProvider(),
+        ),
         ChangeNotifierProvider<TodoFilter>(
           create: (context) => TodoFilter(),
         ),
@@ -48,21 +62,30 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'TODOS',
         debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          appBarTheme: const AppBarTheme(
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              iconTheme: IconThemeData(
-                color: Colors.black,
-              ),
-              titleTextStyle: TextStyle(
-                color: Colors.black,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              )),
-          primarySwatch: Colors.blue,
+        theme: ThemeData.light(
+
+            // appBarTheme: const AppBarTheme(
+            //     backgroundColor: Colors.transparent,
+            //     elevation: 0,
+            //     iconTheme: IconThemeData(
+            //       color: Colors.black,
+            //     ),
+            //     titleTextStyle: TextStyle(
+            //       color: Colors.black,
+            //       fontSize: 20,
+            //       fontWeight: FontWeight.bold,
+            //     )),
+            // primarySwatch: Colors.blue,
+            ),
+        darkTheme: ThemeData.dark().copyWith(
+          appBarTheme: AppBarTheme(
+            color: Colors.transparent,
+            elevation: 0,
+          ),
+          scaffoldBackgroundColor: const Color(0xFF15202B),
         ),
-        home: const TodosPage(),
+        themeMode: isMaterialChanged == true ? ThemeMode.light : ThemeMode.dark,
+        home: TodosPage(),
       ),
     );
   }
